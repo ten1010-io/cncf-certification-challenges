@@ -1,0 +1,10 @@
+id: 16
+title: 로그와 리소스 모니터링
+difficulty: easy
+cert: cka
+domain: troubleshooting
+points: 6
+tags: [logs, metrics, top]
+disruptive: false
+setup_order: 0
+node_access: false

@@ -1,0 +1,10 @@
+id: 34
+title: jsonpath / sort-by 정보 추출
+difficulty: easy
+cert: cka
+domain: troubleshooting
+points: 5
+tags: [jsonpath, sort-by]
+disruptive: false
+setup_order: 0
+node_access: false

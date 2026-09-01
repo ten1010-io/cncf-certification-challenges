@@ -1,0 +1,10 @@
+id: 25
+title: HPA 생성
+difficulty: easy
+cert: cka
+domain: workloads
+points: 5
+tags: [hpa, autoscaling]
+disruptive: false
+setup_order: 0
+node_access: false

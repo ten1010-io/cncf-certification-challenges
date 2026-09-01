@@ -1,0 +1,10 @@
+id: 23
+title: Job 과 CronJob 생성
+difficulty: easy
+cert: cka
+domain: workloads
+points: 4
+tags: [job, cronjob]
+disruptive: false
+setup_order: 0
+node_access: false

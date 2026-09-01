@@ -1,0 +1,10 @@
+id: 15
+title: CoreDNS Corefile 복구 (DNS 장애)
+difficulty: hard
+cert: cka
+domain: troubleshooting
+points: 8
+tags: [coredns, dns]
+disruptive: true
+setup_order: 10
+node_access: false

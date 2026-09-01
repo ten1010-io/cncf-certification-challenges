@@ -1,0 +1,10 @@
+id: 7
+title: 사이드카 로깅 (emptyDir 공유)
+difficulty: easy
+cert: cka
+domain: workloads
+points: 4
+tags: [multi-container, emptydir, logs]
+disruptive: false
+setup_order: 0
+node_access: false

@@ -1,0 +1,10 @@
+id: 27
+title: Ingress → Gateway API 마이그레이션
+difficulty: medium
+cert: cka
+domain: networking
+points: 7
+tags: [ingress, gateway-api, httproute]
+disruptive: false
+setup_order: 0
+node_access: false

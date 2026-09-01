@@ -1,0 +1,10 @@
+id: 17
+title: Service 연결 불가 (selector, targetPort 불일치)
+difficulty: medium
+cert: cka
+domain: troubleshooting
+points: 7
+tags: [service, endpoints, selector]
+disruptive: false
+setup_order: 0
+node_access: false

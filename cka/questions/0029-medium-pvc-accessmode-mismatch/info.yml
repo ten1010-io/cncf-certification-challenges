@@ -1,0 +1,10 @@
+id: 29
+title: PVC Pending (accessModes 불일치)
+difficulty: medium
+cert: cka
+domain: storage
+points: 7
+tags: [pv, pvc, accessmodes]
+disruptive: false
+setup_order: 0
+node_access: false

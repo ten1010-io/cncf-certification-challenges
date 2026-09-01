@@ -1,0 +1,10 @@
+id: 3
+title: 고장난 Deployment 수정
+difficulty: medium
+cert: cka
+domain: troubleshooting
+points: 8
+tags: [deployment, imagepullbackoff, configmap]
+disruptive: false
+setup_order: 0
+node_access: false

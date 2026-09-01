@@ -1,0 +1,10 @@
+id: 28
+title: Secret 환경변수·볼륨 주입
+difficulty: easy
+cert: cka
+domain: workloads
+points: 5
+tags: [secret, env, volume]
+disruptive: false
+setup_order: 0
+node_access: false

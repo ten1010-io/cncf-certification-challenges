@@ -1,0 +1,10 @@
+id: 9
+title: 기본 StorageClass 변경
+difficulty: easy
+cert: cka
+domain: storage
+points: 4
+tags: [storageclass]
+disruptive: false
+setup_order: 0
+node_access: false

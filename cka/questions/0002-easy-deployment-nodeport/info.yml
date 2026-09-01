@@ -1,0 +1,10 @@
+id: 2
+title: Deployment + NodePort Service
+difficulty: easy
+cert: cka
+domain: workloads
+points: 4
+tags: [deployment, service, nodeport]
+disruptive: false
+setup_order: 0
+node_access: false

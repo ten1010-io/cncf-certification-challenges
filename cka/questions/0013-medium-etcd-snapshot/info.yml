@@ -1,0 +1,10 @@
+id: 13
+title: etcd 스냅샷 백업
+difficulty: medium
+cert: cka
+domain: cluster
+points: 8
+tags: [etcd, backup]
+disruptive: false
+setup_order: 0
+node_access: true

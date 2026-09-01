@@ -1,0 +1,10 @@
+id: 4
+title: 롤링 업데이트와 롤백
+difficulty: easy
+cert: cka
+domain: workloads
+points: 5
+tags: [deployment, rollout]
+disruptive: false
+setup_order: 0
+node_access: false

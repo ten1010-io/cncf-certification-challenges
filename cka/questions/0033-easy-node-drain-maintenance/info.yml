@@ -1,0 +1,10 @@
+id: 33
+title: 노드 유지보수 (drain)
+difficulty: easy
+cert: cka
+domain: cluster
+points: 5
+tags: [drain, cordon]
+disruptive: false
+setup_order: 0
+node_access: false

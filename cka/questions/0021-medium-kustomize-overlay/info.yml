@@ -1,0 +1,10 @@
+id: 21
+title: Kustomize overlay 작성과 적용
+difficulty: medium
+cert: cka
+domain: cluster
+points: 5
+tags: [kustomize]
+disruptive: false
+setup_order: 0
+node_access: false

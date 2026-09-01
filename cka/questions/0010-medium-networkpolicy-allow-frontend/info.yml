@@ -1,0 +1,10 @@
+id: 10
+title: NetworkPolicy — frontend 만 허용
+difficulty: medium
+cert: cka
+domain: networking
+points: 7
+tags: [networkpolicy]
+disruptive: false
+setup_order: 0
+node_access: false

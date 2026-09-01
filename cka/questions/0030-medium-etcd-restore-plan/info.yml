@@ -1,0 +1,10 @@
+id: 30
+title: etcd 스냅샷 + 복원 절차 작성
+difficulty: medium
+cert: cka
+domain: cluster
+points: 5
+tags: [etcd, restore]
+disruptive: false
+setup_order: 0
+node_access: true

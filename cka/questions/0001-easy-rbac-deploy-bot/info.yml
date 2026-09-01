@@ -1,0 +1,10 @@
+id: 1
+title: RBAC ServiceAccount 권한 부여
+difficulty: easy
+cert: cka
+domain: cluster
+points: 4
+tags: [rbac, serviceaccount]
+disruptive: false
+setup_order: 0
+node_access: false

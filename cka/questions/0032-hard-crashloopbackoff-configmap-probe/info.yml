@@ -1,0 +1,10 @@
+id: 32
+title: CrashLoopBackOff 복구 (ConfigMap 키 + liveness)
+difficulty: hard
+cert: cka
+domain: troubleshooting
+points: 7
+tags: [crashloopbackoff, configmap, liveness]
+disruptive: false
+setup_order: 0
+node_access: false

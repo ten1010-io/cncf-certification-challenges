@@ -1,0 +1,22 @@
+title: CKA Mock Exam 02
+duration_minutes: 120
+pass_percent: 66
+# 배점 합 100. 0018(스케줄러 고장)은 전역 영향 → 응시자는 이 문항을 먼저 푼다.
+questions:
+  - 0018   # kube-scheduler 매니페스트 고장   8
+  - 0019   # 노드 NotReady (kubelet.conf)    8
+  - 0020   # Helm                            6
+  - 0021   # Kustomize                       5
+  - 0022   # CRD                             5
+  - 0023   # Job/CronJob                     4
+  - 0024   # Pending (리소스+nodeSelector)    6
+  - 0025   # HPA                             5
+  - 0026   # NetworkPolicy default-deny+DNS  7
+  - 0027   # Ingress → Gateway               7
+  - 0028   # Secret 주입                     5
+  - 0029   # PVC accessMode 불일치            7
+  - 0030   # etcd 백업 + 복원 계획            5
+  - 0031   # kubeadm 업그레이드 절차           5
+  - 0032   # CrashLoopBackOff                7
+  - 0033   # 노드 drain                      5
+  - 0034   # jsonpath 추출                   5

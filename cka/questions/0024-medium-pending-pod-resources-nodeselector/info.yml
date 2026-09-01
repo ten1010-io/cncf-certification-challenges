@@ -1,0 +1,10 @@
+id: 24
+title: Pending Pod 해결 (리소스 요구 + nodeSelector)
+difficulty: medium
+cert: cka
+domain: troubleshooting
+points: 6
+tags: [scheduling, resources, nodeselector]
+disruptive: false
+setup_order: 0
+node_access: false

@@ -1,0 +1,10 @@
+id: 26
+title: NetworkPolicy default-deny + DNS 허용
+difficulty: medium
+cert: cka
+domain: networking
+points: 7
+tags: [networkpolicy, dns]
+disruptive: false
+setup_order: 0
+node_access: false

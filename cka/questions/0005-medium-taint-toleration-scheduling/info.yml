@@ -1,0 +1,10 @@
+id: 5
+title: taint/toleration + nodeSelector 스케줄링
+difficulty: medium
+cert: cka
+domain: workloads
+points: 6
+tags: [taint, toleration, nodeselector]
+disruptive: false
+setup_order: 0
+node_access: false

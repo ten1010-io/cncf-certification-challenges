@@ -1,0 +1,10 @@
+id: 6
+title: DaemonSet 전 노드 배치
+difficulty: easy
+cert: cka
+domain: workloads
+points: 4
+tags: [daemonset, toleration]
+disruptive: false
+setup_order: 0
+node_access: false

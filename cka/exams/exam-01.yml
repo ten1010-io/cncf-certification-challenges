@@ -1,0 +1,22 @@
+title: CKA Mock Exam 01
+duration_minutes: 120
+pass_percent: 66
+# 배점 합 100. disruptive 문항(0014 kubelet 정지, 0015 CoreDNS)은 setup_order 에 따라 마지막에 구성됨.
+questions:
+  - 0001   # RBAC                        4
+  - 0002   # Deployment + NodePort       4
+  - 0003   # 고장난 Deployment            8
+  - 0004   # 롤아웃/롤백                  5
+  - 0005   # taint/toleration            6
+  - 0006   # DaemonSet                   4
+  - 0007   # 사이드카 로깅                4
+  - 0008   # PV/PVC                      7
+  - 0009   # 기본 StorageClass            4
+  - 0010   # NetworkPolicy               7
+  - 0011   # Ingress                     5
+  - 0012   # Gateway API                 5
+  - 0013   # etcd 스냅샷                  8
+  - 0014   # 노드 NotReady (kubelet 정지)  8
+  - 0015   # CoreDNS 장애                 8
+  - 0016   # 로그 + top                   6
+  - 0017   # Service endpoints           7

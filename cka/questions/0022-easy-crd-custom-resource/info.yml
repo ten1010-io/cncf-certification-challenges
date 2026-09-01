@@ -1,0 +1,10 @@
+id: 22
+title: CRD 조회와 Custom Resource 생성
+difficulty: easy
+cert: cka
+domain: cluster
+points: 5
+tags: [crd]
+disruptive: false
+setup_order: 0
+node_access: false

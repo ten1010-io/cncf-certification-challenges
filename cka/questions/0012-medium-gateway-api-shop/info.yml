@@ -1,0 +1,10 @@
+id: 12
+title: Gateway API — Gateway + HTTPRoute
+difficulty: medium
+cert: cka
+domain: networking
+points: 5
+tags: [gateway-api, httproute]
+disruptive: false
+setup_order: 0
+node_access: false
