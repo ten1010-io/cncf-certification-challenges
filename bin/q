@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+# q — 문제/모의고사 실행 CLI
+#
+#   q list [cka|ckad] [--domain D] [--difficulty easy|medium|hard]
+#   q start <id>            문제 환경 구성 (setup.sh) + 문제 파일 경로 출력
+#   q check <id>            채점 (check.sh)
+#   q reset <id>            문제 환경 정리 (cleanup.sh)
+#   q show <id>             문제 README 출력
+#   q solution <id>         풀이 출력 (스포일러)
+#   q exam start <exam>     모의고사 시작: 문항 setup 전부 실행, 통합 문제지 생성, 타이머 시작
+#   q exam check <exam>     모의고사 채점: 문항 check 전부 실행, 합산, 합격 판정
+#   q exam reset <exam>     모의고사 정리
+#   q cluster up|down       kind 클러스터 생성/삭제
+#
+# <id> 는 4자리 (0013) 또는 숫자(13). <exam> 은 cka/exams/exam-01.yml 의 "exam-01" 또는 "cka/exam-01".
+set -uo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+STATE_ROOT="${CNCF_STATE:-/tmp/cncf-state}"
+OUT="${CNCF_OUT:-/tmp/cncf-out}"
+
+die() { echo "error: $*" >&2; exit 1; }
+yml() { grep -E "^$2:" "$1" 2>/dev/null | head -1 | sed -E "s/^$2:[[:space:]]*//; s/^[\"']//; s/[\"']$//"; }
+
+find_q() { # find_q <id> -> 디렉토리
+  local id; id=$(printf '%04d' "$((10#${1//[^0-9]/}))") || die "잘못된 id: $1"
+  local d; d=$(ls -d "$ROOT"/*/questions/"$id"-* 2>/dev/null | head -1)
+  [[ -n "$d" ]] || die "문제 $id 없음"
+  echo "$d"
+}
+find_exam() { # find_exam <exam> -> yml 경로
+  local e="$1" f
+  if [[ "$e" == */* ]]; then f="$ROOT/${e%%/*}/exams/${e##*/}.yml"; else f=$(ls "$ROOT"/*/exams/"$e".yml 2>/dev/null | head -1); fi
+  [[ -f "$f" ]] || die "모의고사 $e 없음"
+  echo "$f"
+}
+exam_questions() { sed -n '/^questions:/,$p' "$1" | grep -E '^[[:space:]]*-[[:space:]]*[0-9]+' | sed -E 's/^[[:space:]]*-[[:space:]]*([0-9]+).*/\1/'; }
+
+cmd_list() {
+  local cert="" domain="" diff=""
+  while [[ $# -gt 0 ]]; do case "$1" in --domain) domain="$2"; shift 2;; --difficulty) diff="$2"; shift 2;; *) cert="$1"; shift;; esac; done
+  printf '%-5s %-7s %-16s %-4s %s\n' ID DIFF DOMAIN PTS TITLE
+  for info in "$ROOT"/${cert:-*}/questions/*/info.yml; do
+    [[ -f "$info" ]] || continue
+    local d p t di do_
+    di=$(yml "$info" difficulty); do_=$(yml "$info" domain); p=$(yml "$info" points); t=$(yml "$info" title)
+    [[ -n "$domain" && "$do_" != "$domain" ]] && continue
+    [[ -n "$diff" && "$di" != "$diff" ]] && continue
+    printf '%-5s %-7s %-16s %-4s %s\n' "$(printf '%04d' "$(yml "$info" id)")" "$di" "$do_" "$p" "$t"
+  done
+}
+
+cmd_start() {
+  local d; d=$(find_q "$1") || exit 1
+  echo "==> setup: $(basename "$d")"
+  bash "$d/setup.sh" || die "setup 실패"
+  echo
+  echo "문제: $d/README.md"
+  echo "채점: q check $1"
+}
+cmd_check() { local d; d=$(find_q "$1") || exit 1; bash "$d/check.sh" | grep -v '^RESULT '; }
+cmd_reset() { local d; d=$(find_q "$1") || exit 1; bash "$d/cleanup.sh"; echo "reset: $(basename "$d")"; }
+cmd_show() { local d; d=$(find_q "$1") || exit 1; python3 "$ROOT/scripts/strip-markers.py" "$d/README.md"; }
+cmd_solution() { local d; d=$(find_q "$1") || exit 1; cat "$d/solution.md"; }
+
+exam_dirs_ordered() { # setup_order 오름차순 (disruptive 는 마지막)
+  local f="$1" id d
+  for id in $(exam_questions "$f"); do d=$(find_q "$id") || exit 1; echo "$(yml "$d/info.yml" setup_order) $d"; done | sort -n | awk '{print $2}'
+}
+
+cmd_exam_start() {
+  local f; f=$(find_exam "$1") || exit 1
+  local name; name=$(basename "$f" .yml); local cert; cert=$(basename "$(dirname "$(dirname "$f")")")
+  local dur; dur=$(yml "$f" duration_minutes); dur=${dur:-120}
+  local paper="$OUT/$cert-$name-questions.md"
+  mkdir -p "$OUT" "$STATE_ROOT"
+  echo "==> $cert/$name 환경 구성 ($(exam_questions "$f" | wc -l | tr -d ' ')문항)"
+  for d in $(exam_dirs_ordered "$f"); do echo "  - $(basename "$d")"; bash "$d/setup.sh" >/dev/null || die "setup 실패: $d"; done
+  {
+    echo "# $(yml "$f" title)"; echo
+    echo "- 시간: **${dur}분**. 결과 파일은 \`$OUT/\` 에 저장. 문서는 kubernetes.io 만."
+    echo "- 노드 접속: \`docker exec -it cka-worker bash\` (시험의 ssh). 작업 후 \`exit\`."
+    echo "- 채점: \`q exam check $1\`"; echo; echo "---"; echo
+    local n=0 id d pts title
+    for id in $(exam_questions "$f"); do
+      n=$((n+1)); d=$(find_q "$id"); pts=$(yml "$d/info.yml" points); title=$(yml "$d/info.yml" title)
+      echo "## Q$n. $title — ${pts}%  <sub>($(basename "$d"))</sub>"; echo
+      python3 "$ROOT/scripts/strip-markers.py" "$d/README.md" --no-run | sed -E 's/^## 문제$//' | sed '/./,$!d'
+      echo; echo "---"; echo
+    done
+  } > "$paper"
+  date +%s > "$STATE_ROOT/$cert-$name.start"
+  echo
+  echo "문제지: $paper"
+  echo "시작 시각 기록됨. ${dur}분 후 'q exam check $1'."
+}
+
+cmd_exam_check() {
+  local f; f=$(find_exam "$1") || exit 1
+  local name; name=$(basename "$f" .yml); local cert; cert=$(basename "$(dirname "$(dirname "$f")")")
+  local pass_pct; pass_pct=$(yml "$f" pass_percent); pass_pct=${pass_pct:-66}
+  local total=0 score=0 n=0 id d out line
+  echo "==> 채점 중 (기능 테스트 포함, 1~3분)"; echo
+  for id in $(exam_questions "$f"); do
+    n=$((n+1)); d=$(find_q "$id")
+    out=$(bash "$d/check.sh" 2>/dev/null)
+    line=$(grep '^RESULT ' <<<"$out" | tail -1)
+    score=$((score + $(awk '{print $3}' <<<"$line"))); total=$((total + $(awk '{print $4}' <<<"$line")))
+    echo "Q$n $(grep -v '^RESULT ' <<<"$out" | head -1 | sed -E 's/^\[(PASS|FAIL)\] [0-9]+ /[\1] /')"
+    grep -v '^RESULT ' <<<"$out" | tail -n +2
+  done
+  echo; echo "=========================================="
+  local pct=0; [[ $total -gt 0 ]] && pct=$((score * 100 / total))
+  echo "점수: $score / $total (${pct}%)   합격선 ${pass_pct}%"
+  if [[ -f "$STATE_ROOT/$cert-$name.start" ]]; then
+    local el=$(( ($(date +%s) - $(cat "$STATE_ROOT/$cert-$name.start")) / 60 )); echo "소요: ${el}분"
+  fi
+  [[ $pct -ge $pass_pct ]] && echo "결과: PASS" || echo "결과: FAIL"
+  echo "=========================================="
+  echo "복습: q solution <id>  |  답안 공유: 각 문제 README 의 'Share your Solution'"
+}
+
+cmd_exam_reset() {
+  local f; f=$(find_exam "$1") || exit 1
+  for d in $(exam_dirs_ordered "$f" | tac); do echo "  - reset $(basename "$d")"; bash "$d/cleanup.sh" >/dev/null 2>&1 || true; done
+  echo "완료. 네임스페이스 Terminating 끝난 뒤(kubectl get ns) 다시 start."
+}
+
+case "${1:-}" in
+  list) shift; cmd_list "$@";;
+  start) cmd_start "${2:?id}";;
+  check) cmd_check "${2:?id}";;
+  reset) cmd_reset "${2:?id}";;
+  show) cmd_show "${2:?id}";;
+  solution) cmd_solution "${2:?id}";;
+  exam) case "${2:-}" in start) cmd_exam_start "${3:?exam}";; check) cmd_exam_check "${3:?exam}";; reset) cmd_exam_reset "${3:?exam}";; *) sed -n '2,16p' "$0";; esac;;
+  cluster) case "${2:-}" in up) bash "$ROOT/common/setup/create-cluster.sh";; down) bash "$ROOT/common/setup/destroy-cluster.sh";; *) echo "q cluster up|down";; esac;;
+  *) sed -n '2,16p' "$0";;
+esac
