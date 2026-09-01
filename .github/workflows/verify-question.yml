@@ -1,0 +1,47 @@
+name: Verify Questions
+on:
+  pull_request:
+    paths: ["*/questions/**", "*/exams/**", "common/**", "bin/**", "scripts/**"]
+  workflow_dispatch:
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/lint-questions.sh
+      - name: README up to date
+        run: |
+          REPO="${{ github.repository }}" bash scripts/gen-readme.sh
+          git diff --exit-code -- README.md '*/questions/*/README.md' || { echo "::error::scripts/gen-readme.sh 를 실행해 커밋하세요"; exit 1; }
+
+  # 변경된 문제만 kind 에서 실행: setup 이 성공하고, 풀기 전 check 는 FAIL 이어야 한다.
+  smoke:
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Changed questions
+        id: changed
+        run: |
+          dirs=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '^[a-z]+/questions/[0-9]{4}-' | cut -d/ -f1-3 | sort -u | tr '\n' ' ')
+          echo "dirs=$dirs" >> "$GITHUB_OUTPUT"; echo "changed: $dirs"
+      - uses: helm/kind-action@v1
+        if: steps.changed.outputs.dirs != ''
+        with: { install_only: true }
+      - name: Cluster
+        if: steps.changed.outputs.dirs != ''
+        run: bash common/setup/create-cluster.sh
+      - name: setup → check(FAIL expected) → cleanup
+        if: steps.changed.outputs.dirs != ''
+        run: |
+          set -e
+          for d in ${{ steps.changed.outputs.dirs }}; do
+            echo "::group::$d"
+            bash "$d/setup.sh"
+            out=$(bash "$d/check.sh" || true); echo "$out"
+            grep -q '^RESULT .* FAIL$' <<<"$out" || { echo "::error::$d: 풀기 전인데 check 가 PASS. 채점이 너무 느슨함"; exit 1; }
+            bash "$d/cleanup.sh"
+            echo "::endgroup::"
+          done

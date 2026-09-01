@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 질문 / 토론
+    url: https://github.com/ten1010-io/cncf-certification/discussions
+    about: 개념 질문, 문서 링크 공유, 시험 후기는 Discussions 로.

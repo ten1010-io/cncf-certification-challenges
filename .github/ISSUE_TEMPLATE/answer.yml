@@ -1,0 +1,36 @@
+name: 풀이 공유 (Share your Solution)
+description: 문제를 푼 뒤 명령·YAML·채점 결과를 공유한다. 문제 README 의 "Share your Solution" 버튼으로 열면 제목·라벨이 채워진다.
+labels: ["answer"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        제목은 `0013 - 문제 제목` 형식 유지. 라벨 `answer` + 문제 번호(예 `0013`) + 자격증(`cka`) 이 붙어야 "Check out Solutions" 검색에 잡힌다.
+  - type: textarea
+    id: solution
+    attributes:
+      label: 풀이
+      description: 실행한 명령과 YAML. 어떤 순서로 원인을 찾았는지도.
+      value: |
+        ```bash
+
+        ```
+    validations:
+      required: true
+  - type: textarea
+    id: check
+    attributes:
+      label: q check 출력
+      description: "`./bin/q check NNNN` 결과를 그대로 붙인다."
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: time
+    attributes:
+      label: 소요 시간
+      placeholder: "7분"
+  - type: textarea
+    id: notes
+    attributes:
+      label: 함정 / 배운 점 / 더 빠른 방법
