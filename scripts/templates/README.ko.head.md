@@ -2,8 +2,8 @@
 <h1 align="center">CNCF Certification Challenges</h1>
 
 <p align="center">
-CKA · CKAD · CKS 실습형 문제 은행. 브라우저(Codespaces) 안 실제 Kubernetes 클러스터에서 풀고, 자동 채점하고, Issue 로 풀이를 공유한다.<br>
-<sub>Hands-on Kubernetes certification challenges with auto-grading. Structure inspired by <a href="https://github.com/type-challenges/type-challenges">type-challenges</a>.</sub>
+CKA · CKAD · CKS 실습형 문제 은행. 브라우저(Codespaces)나 로컬의 실제 Kubernetes 클러스터에서 풀고, 자동 채점하고, Issue 로 풀이를 공유한다.<br>
+<sub><a href="./README.md">English</a> · 구조는 <a href="https://github.com/type-challenges/type-challenges">type-challenges</a> 를 참고했다.</sub>
 </p>
 
 <p align="center">
@@ -26,7 +26,7 @@ q exam start exam-01   # 모의고사 17문항 2시간. 문제지 /tmp/cncf-out/
 q exam check exam-01   # 합산 채점, 합격 판정
 ```
 
-로컬(Docker + kind + kubectl)에서는 `./bin/q cluster up` 먼저.
+로컬 실행은 아래 [Codespaces 없이 실행하기](#codespaces-없이-실행하기) 참고.
 
 풀고 나서 각 문제의 **Share your Solution** 버튼 → Issue 에 명령·YAML·`q check` 출력 붙이기. 다른 사람 풀이는 **Check out Solutions**.
 새 문제는 **Add a Question** 이슈 폼 → 봇이 PR 생성 → 메인테이너 `approved` 라벨 → 자동 머지.

@@ -55,9 +55,13 @@ gen_cert_section() { # <cert>
     echo "### $(domain_name "$dom")"; echo; echo "$rows"; echo
   done
 }
-{
-  cat "$ROOT/scripts/templates/README.head.md"
-  for cert in cka ckad cks; do [[ -d "$ROOT/$cert/questions" ]] && ls "$ROOT/$cert"/questions/*/info.yml >/dev/null 2>&1 && gen_cert_section "$cert"; done
-  cat "$ROOT/scripts/templates/README.tail.md"
-} | sed "s#{{REPO}}#$REPO#g" > "$ROOT/README.md"
-echo "README 생성 완료: $(ls "$ROOT"/*/questions/*/info.yml 2>/dev/null | wc -l | tr -d ' ')문항"
+gen_readme() { # gen_readme <lang> <outfile>
+  {
+    cat "$ROOT/scripts/templates/README.$1.head.md"
+    for cert in cka ckad cks; do [[ -d "$ROOT/$cert/questions" ]] && ls "$ROOT/$cert"/questions/*/info.yml >/dev/null 2>&1 && gen_cert_section "$cert"; done
+    cat "$ROOT/scripts/templates/README.$1.tail.md"
+  } | sed "s#{{REPO}}#$REPO#g" > "$ROOT/$2"
+}
+gen_readme en README.md
+gen_readme ko README.ko.md
+echo "README 생성 완료: $(ls "$ROOT"/*/questions/*/info.yml 2>/dev/null | wc -l | tr -d ' ')문항 (README.md, README.ko.md)"

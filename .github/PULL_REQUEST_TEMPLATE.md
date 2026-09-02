@@ -12,7 +12,7 @@
 - [ ] `check.sh` 는 setup 직후 **FAIL**, solution 적용 후 **PASS** 확인함
 - [ ] `cleanup.sh` 실행 후 `kubectl get all -A` 에 잔여 리소스 없음
 - [ ] 지문에 리소스 이름·네임스페이스·경로가 정확히 명시됨 (채점 기준과 일치)
-- [ ] `scripts/lint-questions.sh` 통과, `scripts/gen-readme.sh` 실행함
+- [ ] `scripts/lint-questions.sh` 통과, `scripts/gen-readme.sh` 실행함 (README.md + README.ko.md)
 - [ ] 다른 문항 환경을 깨뜨리면 `disruptive: true`, `setup_order: 10+`
 
 ## 설명

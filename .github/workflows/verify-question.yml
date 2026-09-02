@@ -12,7 +12,7 @@ jobs:
       - name: README up to date
         run: |
           REPO="${{ github.repository }}" bash scripts/gen-readme.sh
-          git diff --exit-code -- README.md '*/questions/*/README.md' || { echo "::error::scripts/gen-readme.sh 를 실행해 커밋하세요"; exit 1; }
+          git diff --exit-code -- README.md README.ko.md "*/questions/*/README.md" || { echo "::error::scripts/gen-readme.sh 를 실행해 커밋하세요"; exit 1; }
 
   # 변경된 문제만 kind 에서 실행: setup 이 성공하고, 풀기 전 check 는 FAIL 이어야 한다.
   smoke:
