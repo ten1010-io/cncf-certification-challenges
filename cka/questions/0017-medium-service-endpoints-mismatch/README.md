@@ -9,8 +9,10 @@ Service 를 수정해 `checkout-svc:80` 으로 Deployment 의 Pod 에 접근되�
 ## 실행
 
 ```bash
-./bin/q start 0017
-./bin/q check 0017
+q start 17      # 환경 구성 + 지문 출력
+q check         # 채점
 ```
+
+로컬(Codespaces 아님)이면 `./bin/q`. 풀이는 `q solution`, 환경 초기화는 `q reset`.
 
 <!--info-footer-start--><br><a href="../../../README.md"><img src="https://img.shields.io/badge/-Back-grey" alt="Back"/></a> <a href="./solution.md"><img src="https://img.shields.io/badge/-Solution%20(spoiler)-red" alt="Solution"/></a> <a href="https://github.com/ten1010-io/cncf-certification/edit/main/cka/questions/0017-medium-service-endpoints-mismatch/README.md"><img src="https://img.shields.io/badge/-Edit-blue" alt="Edit"/></a><!--info-footer-end-->

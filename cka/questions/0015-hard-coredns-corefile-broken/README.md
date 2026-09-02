@@ -13,8 +13,10 @@ kubectl run test --rm -it --image=busybox:1.36 --restart=Never -- nslookup kuber
 ## 실행
 
 ```bash
-./bin/q start 0015
-./bin/q check 0015
+q start 15      # 환경 구성 + 지문 출력
+q check         # 채점
 ```
+
+로컬(Codespaces 아님)이면 `./bin/q`. 풀이는 `q solution`, 환경 초기화는 `q reset`.
 
 <!--info-footer-start--><br><a href="../../../README.md"><img src="https://img.shields.io/badge/-Back-grey" alt="Back"/></a> <a href="./solution.md"><img src="https://img.shields.io/badge/-Solution%20(spoiler)-red" alt="Solution"/></a> <a href="https://github.com/ten1010-io/cncf-certification/edit/main/cka/questions/0015-hard-coredns-corefile-broken/README.md"><img src="https://img.shields.io/badge/-Edit-blue" alt="Edit"/></a><!--info-footer-end-->

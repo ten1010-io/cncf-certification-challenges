@@ -21,7 +21,8 @@
 └── solution.md    # 풀이 + 함정 설명
 ```
 
-- `NNNN`: 다음 빈 번호 (`./bin/q list` 로 확인). 자격증 간 번호 공유 (전역 유일).
+- `NNNN`: 다음 빈 번호 (`q list` 로 확인). 자격증 간 번호 공유 (전역 유일).
+- README 의 `## 실행` 블록은 `q start <번호>` / `q check` 두 줄 + 로컬 안내 한 줄 (기존 문제 복사).
 - `difficulty`: easy / medium / hard.
 - `slug`: 소문자·하이픈.
 
@@ -60,10 +61,10 @@ q_init 0013                                           # STATE=/tmp/cncf-state/00
 ### 검증
 
 ```bash
-./bin/q start 0013 && ./bin/q check 0013      # FAIL 이어야 함
+q start 13 && q check         # FAIL 이어야 함
 # solution.md 대로 풀기
-./bin/q check 0013                            # PASS 이어야 함
-./bin/q reset 0013
+q check                       # PASS 이어야 함
+q reset
 bash scripts/lint-questions.sh
 bash scripts/gen-readme.sh                    # README 헤더·루트 목록 갱신 후 함께 커밋
 ```

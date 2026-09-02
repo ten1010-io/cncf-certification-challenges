@@ -11,8 +11,10 @@
 ## 실행
 
 ```bash
-./bin/q start 0033
-./bin/q check 0033
+q start 33      # 환경 구성 + 지문 출력
+q check         # 채점
 ```
+
+로컬(Codespaces 아님)이면 `./bin/q`. 풀이는 `q solution`, 환경 초기화는 `q reset`.
 
 <!--info-footer-start--><br><a href="../../../README.md"><img src="https://img.shields.io/badge/-Back-grey" alt="Back"/></a> <a href="./solution.md"><img src="https://img.shields.io/badge/-Solution%20(spoiler)-red" alt="Solution"/></a> <a href="https://github.com/ten1010-io/cncf-certification/edit/main/cka/questions/0033-easy-node-drain-maintenance/README.md"><img src="https://img.shields.io/badge/-Edit-blue" alt="Edit"/></a><!--info-footer-end-->

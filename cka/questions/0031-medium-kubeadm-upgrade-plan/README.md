@@ -11,8 +11,10 @@ kubeadm 클러스터의 control-plane 노드 `cka-control-plane` 을 v1.34.x 에
 ## 실행
 
 ```bash
-./bin/q start 0031
-./bin/q check 0031
+q start 31      # 환경 구성 + 지문 출력
+q check         # 채점
 ```
+
+로컬(Codespaces 아님)이면 `./bin/q`. 풀이는 `q solution`, 환경 초기화는 `q reset`.
 
 <!--info-footer-start--><br><a href="../../../README.md"><img src="https://img.shields.io/badge/-Back-grey" alt="Back"/></a> <a href="./solution.md"><img src="https://img.shields.io/badge/-Solution%20(spoiler)-red" alt="Solution"/></a> <a href="https://github.com/ten1010-io/cncf-certification/edit/main/cka/questions/0031-medium-kubeadm-upgrade-plan/README.md"><img src="https://img.shields.io/badge/-Edit-blue" alt="Edit"/></a><!--info-footer-end-->
