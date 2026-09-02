@@ -3,10 +3,10 @@
 #
 #   q list [cka|ckad] [--domain D] [--difficulty easy|medium|hard]
 #   q start <id>            문제 환경 구성 (setup.sh) + 문제 파일 경로 출력
-#   q check <id>            채점 (check.sh)
-#   q reset <id>            문제 환경 정리 (cleanup.sh)
-#   q show <id>             문제 README 출력
-#   q solution <id>         풀이 출력 (스포일러)
+#   q check [id]            채점 (생략 시 마지막 start 한 문제)
+#   q reset [id]            문제 환경 정리
+#   q show [id]             지문 다시 출력
+#   q solution [id]         풀이 출력 (스포일러)
 #   q exam start <exam>     모의고사 시작: 문항 setup 전부 실행, 통합 문제지 생성, 타이머 시작
 #   q exam check <exam>     모의고사 채점: 문항 check 전부 실행, 합산, 합격 판정
 #   q exam reset <exam>     모의고사 정리
@@ -49,18 +49,34 @@ cmd_list() {
   done
 }
 
+CUR_FILE="$STATE_ROOT/current"
+cur_id() { # 인자 없으면 마지막 q start 한 문제
+  if [[ -n "${1:-}" ]]; then echo "$1"; elif [[ -s "$CUR_FILE" ]]; then cat "$CUR_FILE"; else die "문제 번호 없음. 예: q start 13"; fi
+}
+wait_cluster() { # 클러스터 준비 대기 (post-start 가 백그라운드로 만드는 중일 수 있음)
+  local i=0
+  until kubectl --context kind-cka get no >/dev/null 2>&1; do
+    [[ $i -eq 0 ]] && echo "클러스터 준비 중... (로그: tail -f /tmp/cncf-cluster.log). 없으면 'q cluster up'"
+    i=$((i+1)); [[ $i -gt 120 ]] && die "클러스터 없음. q cluster up 실행"
+    sleep 5
+  done
+}
+
 cmd_start() {
   local d; d=$(find_q "$1") || exit 1
+  wait_cluster
   echo "==> setup: $(basename "$d")"
   bash "$d/setup.sh" || die "setup 실패"
-  echo
-  echo "문제: $d/README.md"
-  echo "채점: q check $1"
+  mkdir -p "$STATE_ROOT"; basename "$d" | cut -c1-4 > "$CUR_FILE"
+  echo; echo "──────────────────────────────────────────────"
+  python3 "$ROOT/scripts/strip-markers.py" "$d/README.md" --no-run
+  echo "──────────────────────────────────────────────"
+  echo "채점: q check    풀이: q solution    다시 보기: q show"
 }
-cmd_check() { local d; d=$(find_q "$1") || exit 1; bash "$d/check.sh" | grep -v '^RESULT '; }
-cmd_reset() { local d; d=$(find_q "$1") || exit 1; bash "$d/cleanup.sh"; echo "reset: $(basename "$d")"; }
-cmd_show() { local d; d=$(find_q "$1") || exit 1; python3 "$ROOT/scripts/strip-markers.py" "$d/README.md"; }
-cmd_solution() { local d; d=$(find_q "$1") || exit 1; cat "$d/solution.md"; }
+cmd_check() { local d; d=$(find_q "$(cur_id "${1:-}")") || exit 1; bash "$d/check.sh" | grep -v '^RESULT '; }
+cmd_reset() { local d; d=$(find_q "$(cur_id "${1:-}")") || exit 1; bash "$d/cleanup.sh"; echo "reset: $(basename "$d")"; }
+cmd_show() { local d; d=$(find_q "$(cur_id "${1:-}")") || exit 1; python3 "$ROOT/scripts/strip-markers.py" "$d/README.md"; }
+cmd_solution() { local d; d=$(find_q "$(cur_id "${1:-}")") || exit 1; cat "$d/solution.md"; }
 
 exam_dirs_ordered() { # setup_order 오름차순 (disruptive 는 마지막)
   local f="$1" id d
@@ -127,12 +143,13 @@ cmd_exam_reset() {
 
 case "${1:-}" in
   list) shift; cmd_list "$@";;
-  start) cmd_start "${2:?id}";;
-  check) cmd_check "${2:?id}";;
-  reset) cmd_reset "${2:?id}";;
-  show) cmd_show "${2:?id}";;
-  solution) cmd_solution "${2:?id}";;
+  start) cmd_start "${2:?id (예: q start 13)}";;
+  check) cmd_check "${2:-}";;
+  reset) cmd_reset "${2:-}";;
+  show) cmd_show "${2:-}";;
+  solution) cmd_solution "${2:-}";;
   exam) case "${2:-}" in start) cmd_exam_start "${3:?exam}";; check) cmd_exam_check "${3:?exam}";; reset) cmd_exam_reset "${3:?exam}";; *) sed -n '2,16p' "$0";; esac;;
   cluster) case "${2:-}" in up) bash "$ROOT/common/setup/create-cluster.sh";; down) bash "$ROOT/common/setup/destroy-cluster.sh";; *) echo "q cluster up|down";; esac;;
+  ""|help|-h|--help) sed -n '2,16p' "$0"; echo; cmd_list;;
   *) sed -n '2,16p' "$0";;
 esac

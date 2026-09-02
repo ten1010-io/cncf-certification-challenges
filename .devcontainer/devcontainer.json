@@ -1,16 +1,33 @@
 {
   "name": "cncf-certification",
-  "build": { "dockerfile": "Dockerfile" },
-  "hostRequirements": { "cpus": 4, "memory": "8gb", "storage": "32gb" },
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": { "moby": true, "dockerDashComposeVersion": "none" }
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": true,
+      "dockerDashComposeVersion": "none"
+    }
   },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "postAttachCommand": "echo '클러스터: q cluster up   |   문제: q list   |   처음이면 클러스터 생성 3~5분'",
+  "postAttachCommand": "bash .devcontainer/post-attach.sh",
   "customizations": {
     "vscode": {
-      "extensions": ["ms-kubernetes-tools.vscode-kubernetes-tools", "redhat.vscode-yaml", "bierner.markdown-preview-github-styles"],
-      "settings": { "terminal.integrated.defaultProfile.linux": "bash" }
+      "extensions": [
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "redhat.vscode-yaml",
+        "bierner.markdown-preview-github-styles"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
     }
-  }
+  },
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "waitFor": "postCreateCommand"
 }

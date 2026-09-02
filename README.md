@@ -14,20 +14,19 @@ CKA · CKAD · CKS 실습형 문제 은행. 브라우저(Codespaces) 안 실제 
 
 ## 사용법
 
+Codespaces 는 열리면 클러스터를 백그라운드로 자동 생성한다(첫 3~5분). 터미널에서:
+
 ```bash
-# 1. 클러스터 (Codespaces 또는 로컬 Docker). 한 번만.
-./bin/q cluster up
+q start 13          # 환경 구성 + 지문 출력. 이제 kubectl 로 풀기
+q check             # 채점 (마지막 start 한 문제)
+q solution          # 풀이 (스포일러)
+q list cka          # 목록 (--domain troubleshooting --difficulty hard 필터)
 
-# 2. 문제 하나 풀기
-./bin/q list cka                 # 목록 (--domain troubleshooting --difficulty hard 필터)
-./bin/q start 0013               # 환경 구성 → cka/questions/0013-*/README.md 읽고 풀기
-./bin/q check 0013               # 채점
-./bin/q solution 0013            # 풀이 (스포일러)
-
-# 3. 모의고사 (2시간, 17문항)
-./bin/q exam start exam-01       # 문제지: /tmp/cncf-out/cka-exam-01-questions.md
-./bin/q exam check exam-01       # 합산 채점, 합격 판정
+q exam start exam-01   # 모의고사 17문항 2시간. 문제지 /tmp/cncf-out/cka-exam-01-questions.md
+q exam check exam-01   # 합산 채점, 합격 판정
 ```
+
+로컬(Docker + kind + kubectl)에서는 `./bin/q cluster up` 먼저.
 
 풀고 나서 각 문제의 **Share your Solution** 버튼 → Issue 에 명령·YAML·`q check` 출력 붙이기. 다른 사람 풀이는 **Check out Solutions**.
 
