@@ -78,7 +78,7 @@ q start 13 && q check         # FAIL 이어야 함
 q check                       # PASS 이어야 함
 q reset
 bash scripts/lint-questions.sh
-bash scripts/gen-readme.sh                    # README 헤더·루트 목록 갱신 후 함께 커밋
+bash scripts/gen-readme.sh    # 문제 README 헤더 + README.md/README.ko.md 갱신. 함께 커밋
 ```
 
 CI 는 lint + README 최신 여부 + 변경된 문항의 setup/check(FAIL)/cleanup 스모크를 kind 에서 돌린다.
