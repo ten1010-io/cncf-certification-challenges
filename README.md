@@ -7,9 +7,9 @@ CKA · CKAD · CKS 실습형 문제 은행. 브라우저(Codespaces) 안 실제 
 </p>
 
 <p align="center">
-<a href="https://codespaces.new/ten1010-io/cncf-certification?quickstart=1"><img src="https://img.shields.io/badge/-Open%20in%20Codespaces-24292f?logo=github&style=for-the-badge" alt="Open in Codespaces"/></a>
-<a href="https://github.com/ten1010-io/cncf-certification/issues?q=label%3Aanswer"><img src="https://img.shields.io/badge/-Solutions-de5a77?style=for-the-badge" alt="Solutions"/></a>
-<a href="https://github.com/ten1010-io/cncf-certification/issues/new?template=new-question.yml"><img src="https://img.shields.io/badge/-Add%20a%20Question-teal?style=for-the-badge" alt="Add a Question"/></a>
+<a href="https://codespaces.new/ten1010-io/cncf-certification-challenges?quickstart=1"><img src="https://img.shields.io/badge/-Open%20in%20Codespaces-24292f?logo=github&style=for-the-badge" alt="Open in Codespaces"/></a>
+<a href="https://github.com/ten1010-io/cncf-certification-challenges/issues?q=label%3Aanswer"><img src="https://img.shields.io/badge/-Solutions-de5a77?style=for-the-badge" alt="Solutions"/></a>
+<a href="https://github.com/ten1010-io/cncf-certification-challenges/issues/new?template=new-question.yml"><img src="https://img.shields.io/badge/-Add%20a%20Question-teal?style=for-the-badge" alt="Add a Question"/></a>
 </p>
 
 ## 사용법
