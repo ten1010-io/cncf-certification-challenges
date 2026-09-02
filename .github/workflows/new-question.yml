@@ -1,0 +1,84 @@
+# '새 문제 제안' 이슈 → 문제 폴더 생성 → PR. 이슈를 수정하면 같은 PR 이 갱신된다.
+name: New Question (issue → PR)
+on:
+  issues:
+    types: [opened, edited, reopened]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  generate:
+    if: contains(github.event.issue.labels.*.name, 'new-question')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          token: ${{ secrets.QUESTION_BOT_TOKEN || github.token }}
+
+      - name: Generate question folder
+        id: gen
+        run: |
+          set +e
+          out=$(python3 scripts/issue-to-question.py "$GITHUB_EVENT_PATH" 2>/tmp/err); rc=$?
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            { echo "errors<<EOF"; cat /tmp/err; echo "EOF"; } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          echo "$out" >> "$GITHUB_OUTPUT"
+
+      - name: Report validation errors
+        if: steps.gen.outputs.ok == 'false'
+        uses: actions/github-script@v7
+        env:
+          ERRORS: ${{ steps.gen.outputs.errors }}
+        with:
+          script: |
+            const body = `### ❌ 폼 검증 실패\n\n${process.env.ERRORS}\n\n이슈 본문을 **수정(Edit)** 하면 자동으로 다시 시도한다.`;
+            await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            await github.rest.issues.addLabels({ ...context.repo, issue_number: context.issue.number, labels: ['invalid'] });
+
+      - name: Lint + regenerate README
+        if: steps.gen.outputs.ok == 'true'
+        run: |
+          bash scripts/lint-questions.sh
+          REPO="${{ github.repository }}" bash scripts/gen-readme.sh
+
+      - name: Create / update PR
+        if: steps.gen.outputs.ok == 'true'
+        id: pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.QUESTION_BOT_TOKEN || github.token }}
+          branch: question/issue-${{ github.event.issue.number }}
+          delete-branch: true
+          commit-message: "feat: 새 문제 ${{ steps.gen.outputs.id }} ${{ steps.gen.outputs.title }} (#${{ github.event.issue.number }})"
+          title: "feat: 새 문제 ${{ steps.gen.outputs.id }} — ${{ steps.gen.outputs.title }}"
+          labels: new-question
+          body: |
+            이슈 #${{ github.event.issue.number }} 의 폼으로 생성된 문제.
+
+            - 폴더: `${{ steps.gen.outputs.dir }}`
+            - 제안자: @${{ github.event.issue.user.login }}
+
+            **메인테이너**: 내용 확인 후 이슈에 `approved` 라벨을 달면 자동 머지된다. 수정이 필요하면 이슈 본문을 고치도록 코멘트하거나 이 브랜치에 직접 커밋한다.
+
+            Closes #${{ github.event.issue.number }}
+
+      - name: Comment PR link on issue
+        if: steps.gen.outputs.ok == 'true'
+        uses: actions/github-script@v7
+        env:
+          PR_URL: ${{ steps.pr.outputs.pull-request-url }}
+          QID: ${{ steps.gen.outputs.id }}
+          QDIR: ${{ steps.gen.outputs.dir }}
+        with:
+          script: |
+            const { PR_URL, QID, QDIR } = process.env;
+            const body = `### ✅ 문제 ${QID} 생성됨\n\nPR: ${PR_URL}\n폴더: \`${QDIR}\`\n\n메인테이너가 이 이슈에 \`approved\` 라벨을 달면 자동 머지된다. 내용을 바꾸려면 이슈 본문을 수정하면 PR 이 갱신된다.`;
+            await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            try { await github.rest.issues.removeLabel({ ...context.repo, issue_number: context.issue.number, name: 'invalid' }); } catch (e) {}

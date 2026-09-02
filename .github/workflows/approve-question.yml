@@ -1,0 +1,28 @@
+# 메인테이너가 '새 문제 제안' 이슈에 approved 라벨 → 해당 PR squash 머지 → 이슈 자동 종료(Closes).
+name: Approve Question (label → merge)
+on:
+  issues:
+    types: [labeled]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  merge:
+    if: github.event.label.name == 'approved' && contains(github.event.issue.labels.*.name, 'new-question')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.QUESTION_BOT_TOKEN || github.token }}
+      BRANCH: question/issue-${{ github.event.issue.number }}
+    steps:
+      - name: Find and merge PR
+        run: |
+          pr=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq '.[0].number')
+          if [ -z "$pr" ] || [ "$pr" = "null" ]; then
+            gh issue comment "${{ github.event.issue.number }}" --repo "$GITHUB_REPOSITORY" \
+              --body "⚠️ 브랜치 \`$BRANCH\` 의 열린 PR 이 없다. 이슈 본문을 수정해 봇을 다시 트리거하거나 PR 을 직접 만들어라."
+            exit 1
+          fi
+          gh pr merge "$pr" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+          gh issue comment "${{ github.event.issue.number }}" --repo "$GITHUB_REPOSITORY" \
+            --body "🎉 승인됨. PR #$pr 머지 → 문제가 저장소에 추가되었다. README 목록은 곧 갱신된다."

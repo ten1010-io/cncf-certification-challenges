@@ -7,7 +7,19 @@
 문제 README 상단 **Share your Solution** 클릭 → 제목·라벨이 채워진 이슈 폼. 명령·YAML·`q check` 출력·소요 시간·함정을 적는다.
 다른 사람 풀이는 **Check out Solutions** (`label:answer label:NNNN`).
 
-## 문제 추가 (PR)
+## 문제 추가
+
+두 가지 경로. 결과는 같다.
+
+### A. 이슈 폼 (권장, 코드 몰라도 됨)
+
+1. Issues → New issue → **새 문제 제안 (New Question)** 폼 작성. 스크립트 필드는 본문만(헤더는 봇이 붙임).
+2. 봇이 다음 번호를 배정해 문제 폴더를 만들고 PR 을 올린 뒤 이슈에 링크를 코멘트한다. 검증 실패면 오류 목록을 코멘트하고 `invalid` 라벨 → 이슈 본문 수정하면 재시도.
+3. 메인테이너가 내용 확인 후 이슈에 **`approved`** 라벨 → PR 자동 squash 머지 → 이슈 종료 → README 목록 갱신.
+
+### B. 직접 PR
+
+아래 규약대로 폴더를 만들어 PR. CI 가 lint + kind 스모크를 돈다.
 
 ### 폴더
 

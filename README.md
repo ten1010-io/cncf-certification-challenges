@@ -9,7 +9,7 @@ CKA · CKAD · CKS 실습형 문제 은행. 브라우저(Codespaces) 안 실제 
 <p align="center">
 <a href="https://codespaces.new/ten1010-io/cncf-certification?quickstart=1"><img src="https://img.shields.io/badge/-Open%20in%20Codespaces-24292f?logo=github&style=for-the-badge" alt="Open in Codespaces"/></a>
 <a href="https://github.com/ten1010-io/cncf-certification/issues?q=label%3Aanswer"><img src="https://img.shields.io/badge/-Solutions-de5a77?style=for-the-badge" alt="Solutions"/></a>
-<a href="./CONTRIBUTING.md"><img src="https://img.shields.io/badge/-Add%20a%20Question-teal?style=for-the-badge" alt="Contribute"/></a>
+<a href="https://github.com/ten1010-io/cncf-certification/issues/new?template=new-question.yml"><img src="https://img.shields.io/badge/-Add%20a%20Question-teal?style=for-the-badge" alt="Add a Question"/></a>
 </p>
 
 ## 사용법
@@ -29,6 +29,7 @@ q exam check exam-01   # 합산 채점, 합격 판정
 로컬(Docker + kind + kubectl)에서는 `./bin/q cluster up` 먼저.
 
 풀고 나서 각 문제의 **Share your Solution** 버튼 → Issue 에 명령·YAML·`q check` 출력 붙이기. 다른 사람 풀이는 **Check out Solutions**.
+새 문제는 **Add a Question** 이슈 폼 → 봇이 PR 생성 → 메인테이너 `approved` 라벨 → 자동 머지.
 
 난이도: <img src="https://img.shields.io/badge/-easy-7aad0c"/> <img src="https://img.shields.io/badge/-medium-d9901a"/> <img src="https://img.shields.io/badge/-hard-de3d37"/>
 
@@ -77,7 +78,7 @@ q exam check exam-01   # 합산 채점, 합격 판정
 
 ## 기여
 
-문제 추가는 PR, 풀이 공유는 Issue. 규약은 [CONTRIBUTING.md](CONTRIBUTING.md). 새 문제 폴더: `<cert>/questions/NNNN-<difficulty>-<slug>/{README.md,info.yml,setup.sh,check.sh,cleanup.sh,solution.md}`.
+풀이 공유 = Issue, 문제 추가 = **Add a Question** 이슈 폼(봇이 PR 생성, `approved` 라벨로 머지) 또는 직접 PR. 규약은 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

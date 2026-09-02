@@ -19,7 +19,7 @@
 
 ## 기여
 
-문제 추가는 PR, 풀이 공유는 Issue. 규약은 [CONTRIBUTING.md](CONTRIBUTING.md). 새 문제 폴더: `<cert>/questions/NNNN-<difficulty>-<slug>/{README.md,info.yml,setup.sh,check.sh,cleanup.sh,solution.md}`.
+풀이 공유 = Issue, 문제 추가 = **Add a Question** 이슈 폼(봇이 PR 생성, `approved` 라벨로 머지) 또는 직접 PR. 규약은 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
