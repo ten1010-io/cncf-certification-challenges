@@ -13,6 +13,20 @@
 | 결과 파일 `/opt/...` | `/tmp/cncf-out/...` |
 | kubeadm 업그레이드·etcd 복원 실습 | kind 에서 위험 → 명령 시퀀스 작성형 문제로 대체 |
 
+## 로컬 실행 (크레딧 없이 무제한)
+
+Codespaces 와 동일한 kind 클러스터를 로컬 Docker 에 만든다. minikube 는 노드명·인증서 경로·포트가 달라 일부 문제와 어긋나므로 kind 권장.
+
+```bash
+brew install kind kubectl helm            # Docker Desktop: Memory 8GB, CPU 4 이상
+git clone https://github.com/{{REPO}}.git && cd $(basename {{REPO}})
+export PATH="$PATH:$PWD/bin"; alias k=kubectl
+q cluster up                              # 첫 5분
+q start 1
+```
+
+문제별 환경은 `<cert>/questions/NNNN-*/setup.sh`, 채점 기준은 같은 폴더 `check.sh`, 클러스터 구성은 `common/setup/`.
+
 ## Codespaces 속도
 
 첫 생성은 이미지 빌드(docker-in-docker + kubectl/kind/helm) 2~4분 + `q cluster up` 3~5분. 팀 저장소면 **Settings → Codespaces → Set up prebuild** (branch `main`, region 가까운 곳) 를 켜두면 빌드 단계가 사라져 수십 초에 열린다. Codespace 는 정지해도 디스크가 남으므로 두 번째부터는 클러스터도 대개 살아 있다.
