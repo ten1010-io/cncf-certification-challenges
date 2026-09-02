@@ -13,6 +13,10 @@
 | 결과 파일 `/opt/...` | `/tmp/cncf-out/...` |
 | kubeadm 업그레이드·etcd 복원 실습 | kind 에서 위험 → 명령 시퀀스 작성형 문제로 대체 |
 
+## Codespaces 속도
+
+첫 생성은 이미지 빌드(docker-in-docker + kubectl/kind/helm) 2~4분 + `q cluster up` 3~5분. 팀 저장소면 **Settings → Codespaces → Set up prebuild** (branch `main`, region 가까운 곳) 를 켜두면 빌드 단계가 사라져 수십 초에 열린다. Codespace 는 정지해도 디스크가 남으므로 두 번째부터는 클러스터도 대개 살아 있다.
+
 ## 기여
 
 문제 추가는 PR, 풀이 공유는 Issue. 규약은 [CONTRIBUTING.md](CONTRIBUTING.md). 새 문제 폴더: `<cert>/questions/NNNN-<difficulty>-<slug>/{README.md,info.yml,setup.sh,check.sh,cleanup.sh,solution.md}`.
