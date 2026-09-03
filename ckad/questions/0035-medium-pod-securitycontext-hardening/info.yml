@@ -1,0 +1,10 @@
+id: 35
+title: SecurityContext 로 컨테이너 권한 제한
+difficulty: medium
+cert: ckad
+domain: environment
+points: 4
+tags: [securitycontext, capabilities, pod]
+disruptive: false
+setup_order: 0
+node_access: false

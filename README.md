@@ -54,6 +54,14 @@ Difficulty: <img src="https://img.shields.io/badge/-easy-7aad0c"/> <img src="htt
 
 <a href="./cka/questions/0008-medium-pv-pvc-hostpath/README.md"><img src="https://img.shields.io/badge/0008-PV%20/%20PVC%20%28hostPath%2C%20manual%29-d9901a" alt="0008 PV / PVC (hostPath, manual)"/></a> <a href="./cka/questions/0009-easy-default-storageclass/README.md"><img src="https://img.shields.io/badge/0009-%EA%B8%B0%EB%B3%B8%20StorageClass%20%EB%B3%80%EA%B2%BD-7aad0c" alt="0009 기본 StorageClass 변경"/></a> <a href="./cka/questions/0029-medium-pvc-accessmode-mismatch/README.md"><img src="https://img.shields.io/badge/0029-PVC%20Pending%20%28accessModes%20%EB%B6%88%EC%9D%BC%EC%B9%98%29-d9901a" alt="0029 PVC Pending (accessModes 불일치)"/></a> 
 
+## CKAD — Certified Kubernetes Application Developer
+
+노트: [`ckad/notes/`](ckad/notes/) · 모의고사: 
+
+### Application Environment, Configuration and Security
+
+<a href="./ckad/questions/0035-medium-pod-securitycontext-hardening/README.md"><img src="https://img.shields.io/badge/0035-SecurityContext%20%EB%A1%9C%20%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88%20%EA%B6%8C%ED%95%9C%20%EC%A0%9C%ED%95%9C-d9901a" alt="0035 SecurityContext 로 컨테이너 권한 제한"/></a> 
+
 ## Run without Codespaces
 
 Codespaces has a monthly free quota. Running locally costs nothing and gives you the exact same cluster, because both use [kind](https://kind.sigs.k8s.io/) (Kubernetes in Docker).
