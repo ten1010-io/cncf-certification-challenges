@@ -230,7 +230,7 @@ PR: $url
 
   git -C "$ROOT" switch -q "$orig"
   echo; echo "완료. PR: $url"
-  echo "로컬 검증하려면: git switch $branch && q start ${qid#0} && q check"
+  echo "로컬 검증하려면: git switch $branch && q start $((10#$qid)) && q check"
 }
 
 case "${1:-}" in
