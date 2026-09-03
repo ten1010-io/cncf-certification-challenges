@@ -26,7 +26,7 @@ q exam start exam-01   # 17-question mock exam, 2 hours. Paper: /tmp/cncf-out/ck
 q exam check exam-01   # total score and pass/fail
 ```
 
-After solving, hit **Share your Solution** on the question page and paste your commands, YAML, and `q check` output. Browse other people's answers with **Check out Solutions**. To propose a question, use **Add a Question** - a bot opens the PR and a maintainer merges it with the `approved` label.
+After solving, hit **Share your Solution** on the question page and paste your commands, YAML, and `q check` output. Browse other people's answers with **Check out Solutions**. To propose a question, use **Add a Question**. CI validates the form and a maintainer turns it into a PR.
 
 Difficulty: <img src="https://img.shields.io/badge/-easy-7aad0c"/> <img src="https://img.shields.io/badge/-medium-d9901a"/> <img src="https://img.shields.io/badge/-hard-de3d37"/>
 

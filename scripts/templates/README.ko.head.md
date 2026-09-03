@@ -29,7 +29,7 @@ q exam check exam-01   # 합산 채점, 합격 판정
 로컬 실행은 아래 [Codespaces 없이 실행하기](#codespaces-없이-실행하기) 참고.
 
 풀고 나서 각 문제의 **Share your Solution** 버튼 → Issue 에 명령·YAML·`q check` 출력 붙이기. 다른 사람 풀이는 **Check out Solutions**.
-새 문제는 **Add a Question** 이슈 폼 → 봇이 PR 생성 → 메인테이너 `approved` 라벨 → 자동 머지.
+새 문제는 **Add a Question** 이슈 폼 → 자동 검증 → 메인테이너가 반영해 PR 을 연다.
 
 난이도: <img src="https://img.shields.io/badge/-easy-7aad0c"/> <img src="https://img.shields.io/badge/-medium-d9901a"/> <img src="https://img.shields.io/badge/-hard-de3d37"/>
 

@@ -13,9 +13,10 @@
 
 ### A. 이슈 폼 (권장, 코드 몰라도 됨)
 
-1. Issues → New issue → **새 문제 제안 (New Question)** 폼 작성. 스크립트 필드는 본문만(헤더는 봇이 붙임).
-2. 봇이 다음 번호를 배정해 문제 폴더를 만들고 PR 을 올린 뒤 이슈에 링크를 코멘트한다. 검증 실패면 오류 목록을 코멘트하고 `invalid` 라벨 → 이슈 본문 수정하면 재시도.
-3. 메인테이너가 내용 확인 후 이슈에 **`approved`** 라벨 → PR 자동 squash 머지 → 이슈 종료 → README 목록 갱신.
+1. Issues → New issue → **새 문제 제안 (New Question)** 폼 작성. 스크립트 필드는 본문만(헤더는 자동으로 붙는다).
+2. GitHub Actions 가 폼을 검증해 코멘트한다. 실패하면 오류 목록 + `invalid` 라벨 → 본문을 수정하면 다시 검증한다.
+3. 메인테이너가 내용을 확인하고 로컬에서 `q issue take <이슈번호>` 를 실행한다. 다음 번호를 배정해 문제 폴더를 만들고 lint·README 생성까지 마친 뒤 브랜치를 push 하고 PR 을 연다.
+4. PR 리뷰 후 머지 → 이슈 자동 종료(`Closes #N`) → README 목록 갱신.
 
 ### B. 직접 PR
 
@@ -109,16 +110,29 @@ questions:
 
 `<cert>/notes/` 도메인당 1파일. 시험에 나오는 것만. 명령·YAML 은 복붙 가능한 형태로.
 
-## 메인테이너: 저장소 설정
+## 메인테이너: 이슈를 문제로 반영하기
 
-이슈 폼 → 봇 PR 자동화가 동작하려면 아래가 켜져 있어야 한다.
+`gh` CLI 로 로그인되어 있어야 한다 (`brew install gh && gh auth login`).
 
-| 위치 | 설정 |
-|---|---|
-| 조직 Settings → Actions → General | Workflow permissions: **Read and write**, **Allow GitHub Actions to create and approve pull requests** 체크 |
-| 저장소 Settings → Actions → General | 위와 동일 (조직 설정이 저장소를 덮어쓰므로 조직부터) |
-| 저장소 Settings → General → Pull Requests | **Allow squash merging** 체크 (`approved` 라벨 머지가 squash 를 쓴다) |
+```bash
+q issue list            # 검토 대기 중인 제안 목록
+q issue take 12         # 이슈 12 → 문제 폴더 생성 → 브랜치 → 커밋 → push → PR
+q issue take 12 --no-pr # push/PR 없이 로컬 브랜치까지만 (검토용)
+```
 
-조직 정책상 Actions 의 PR 생성을 열 수 없다면, `QUESTION_BOT_TOKEN` 시크릿에 fine-grained PAT(이 저장소 대상, Contents·Pull requests·Issues write)을 넣으면 우회된다. 워크플로우가 이 시크릿을 우선 사용한다.
+`q issue take` 가 하는 일:
 
-PR 생성이 막히면 봇이 이슈에 브랜치 비교 링크를 남기므로 수동으로 PR 을 열어도 된다. 그 PR 도 `approved` 라벨 머지 대상이다.
+1. `gh` 로 이슈 본문을 받아 폼을 검증한다.
+2. `origin/main` 에서 `question/issue-<N>` 브랜치를 만든다.
+3. 다음 빈 번호를 배정해 문제 폴더 6개 파일을 생성한다.
+4. `lint-questions.sh` 와 `gen-readme.sh` 를 돌린다.
+5. `Closes #N` 커밋 → push → PR 생성 → 이슈에 PR 링크 코멘트.
+6. 원래 브랜치로 돌아온다.
+
+머지 전에 실제로 풀어보려면 브랜치로 이동해 `q start <번호>` → `q check` 로 확인한다. 커밋되지 않은 변경이 있으면 명령이 중단되므로 작업 트리를 먼저 정리한다.
+
+### 왜 봇이 PR 을 만들지 않나
+
+조직 설정에서 *Allow GitHub Actions to create and approve pull requests* 가 꺼져 있으면 Actions 는 PR 을 만들 수 없다. 조직 관리자가 아니면 켤 수 없으므로, 검증만 Actions 가 하고 생성·PR 은 메인테이너 로컬에서 처리한다.
+
+조직 설정을 켤 수 있거나 저장소 시크릿을 추가할 수 있다면 완전 자동화도 가능하다. `QUESTION_BOT_TOKEN` 시크릿에 fine-grained PAT(이 저장소 대상, Contents·Pull requests·Issues write)을 넣으면 PAT 이 사용자 자격으로 동작하므로 Actions 제한을 우회한다. 그 경우 워크플로우에 PR 생성 단계를 되살리면 된다.

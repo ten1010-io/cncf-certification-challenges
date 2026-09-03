@@ -61,7 +61,7 @@ q reset            # 문제 리소스 정리
 
 ## 기여
 
-풀이 공유 = Issue, 문제 추가 = **Add a Question** 이슈 폼(봇이 PR 생성, `approved` 라벨로 머지) 또는 직접 PR. 규약은 [CONTRIBUTING.md](CONTRIBUTING.md).
+풀이 공유 = Issue, 문제 추가 = **Add a Question** 이슈 폼 또는 직접 PR. 규약과 메인테이너 절차는 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

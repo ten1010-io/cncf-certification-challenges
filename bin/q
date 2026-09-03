@@ -12,6 +12,11 @@
 #   q exam reset <exam>     모의고사 정리
 #   q cluster up|down       kind 클러스터 생성/삭제
 #
+#   메인테이너용 (gh CLI 필요):
+#   q issue list            'new-question' 라벨 열린 이슈 목록
+#   q issue take <N>        이슈 N 의 폼으로 문제 폴더 생성 → 브랜치 → 커밋 → push → PR
+#   q issue take <N> --no-pr   push/PR 없이 로컬 브랜치까지만
+#
 # <id> 는 4자리 (0013) 또는 숫자(13). <exam> 은 cka/exams/exam-01.yml 의 "exam-01" 또는 "cka/exam-01".
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -141,6 +146,93 @@ cmd_exam_reset() {
   echo "완료. 네임스페이스 Terminating 끝난 뒤(kubectl get ns) 다시 start."
 }
 
+
+# ---- 메인테이너: 이슈 폼 → 문제 폴더 → PR (로컬에서 실행)
+gh_repo() { source "$ROOT/scripts/config.sh"; echo "$REPO"; }
+
+cmd_issue_list() {
+  command -v gh >/dev/null || die "gh CLI 필요: brew install gh && gh auth login"
+  gh issue list -R "$(gh_repo)" --label new-question --state open \
+    --json number,title,author,createdAt \
+    --template '{{range .}}#{{.number}}  {{.title}}  (@{{.author.login}}){{"\n"}}{{end}}'
+}
+
+cmd_issue_take() {
+  local n="${1:?이슈 번호}" nopr=0
+  [[ "${2:-}" == "--no-pr" ]] && nopr=1
+  command -v gh >/dev/null || die "gh CLI 필요: brew install gh && gh auth login"
+  local repo; repo=$(gh_repo)
+  local branch="question/issue-$n"
+
+  git -C "$ROOT" diff --quiet && git -C "$ROOT" diff --cached --quiet \
+    || die "커밋되지 않은 변경이 있다. 먼저 정리하고 다시 실행."
+  local orig; orig=$(git -C "$ROOT" rev-parse --abbrev-ref HEAD)
+
+  echo "==> 이슈 #$n 가져오는 중"
+  local body="$STATE_ROOT/issue-$n.md"; mkdir -p "$STATE_ROOT"
+  gh issue view "$n" -R "$repo" --json body --jq .body > "$body" || die "이슈 조회 실패"
+  local author; author=$(gh issue view "$n" -R "$repo" --json author --jq .author.login)
+
+  echo "==> 폼 검증"
+  python3 "$ROOT/scripts/issue-to-question.py" "$body" --dry-run --root "$ROOT" >/dev/null || die "폼 검증 실패 (위 오류 참고)"
+
+  echo "==> 브랜치 $branch 준비 (origin/main 기준)"
+  git -C "$ROOT" fetch -q origin
+  git -C "$ROOT" branch -D "$branch" >/dev/null 2>&1 || true
+  git -C "$ROOT" switch -q -c "$branch" origin/main || die "브랜치 생성 실패"
+
+  echo "==> 문제 폴더 생성"
+  local out; out=$(python3 "$ROOT/scripts/issue-to-question.py" "$body" --root "$ROOT") || {
+    git -C "$ROOT" switch -q "$orig"; die "생성 실패"; }
+  local qid qdir qtitle
+  qid=$(sed -n 's/^id=//p' <<<"$out"); qdir=$(sed -n 's/^dir=//p' <<<"$out"); qtitle=$(sed -n 's/^title=//p' <<<"$out")
+  echo "    $qdir"
+
+  echo "==> lint + README 생성"
+  bash "$ROOT/scripts/lint-questions.sh" || { git -C "$ROOT" switch -q "$orig"; die "lint 실패"; }
+  REPO="$repo" bash "$ROOT/scripts/gen-readme.sh" >/dev/null
+
+  git -C "$ROOT" add -A
+  git -C "$ROOT" commit -q -m "feat: 새 문제 $qid $qtitle (#$n)
+
+이슈 #$n 의 폼으로 생성. 제안자 @$author.
+
+Closes #$n"
+
+  if [[ $nopr -eq 1 ]]; then
+    echo; echo "브랜치 $branch 에 커밋 완료 (push/PR 안 함)."
+    echo "확인: git show --stat"
+    echo "되돌리기: git switch $orig && git branch -D $branch"
+    return
+  fi
+
+  echo "==> push"
+  git -C "$ROOT" push -q --force-with-lease -u origin "$branch" || { git -C "$ROOT" switch -q "$orig"; die "push 실패"; }
+
+  echo "==> PR 생성"
+  local url
+  url=$(gh pr create -R "$repo" --base main --head "$branch" \
+    --title "feat: 새 문제 $qid — $qtitle" \
+    --label new-question \
+    --body "이슈 #$n 의 폼으로 생성된 문제.
+
+- 폴더: \`$qdir\`
+- 제안자: @$author
+
+Closes #$n") || { git -C "$ROOT" switch -q "$orig"; die "PR 생성 실패"; }
+
+  gh issue comment "$n" -R "$repo" --body "### ✅ 문제 $qid 생성됨
+
+PR: $url
+폴더: \`$qdir\`
+
+리뷰 후 머지되면 문제 목록에 추가된다." >/dev/null || true
+
+  git -C "$ROOT" switch -q "$orig"
+  echo; echo "완료. PR: $url"
+  echo "로컬 검증하려면: git switch $branch && q start ${qid#0} && q check"
+}
+
 case "${1:-}" in
   list) shift; cmd_list "$@";;
   start) cmd_start "${2:?id (예: q start 13)}";;
@@ -148,8 +240,12 @@ case "${1:-}" in
   reset) cmd_reset "${2:-}";;
   show) cmd_show "${2:-}";;
   solution) cmd_solution "${2:-}";;
-  exam) case "${2:-}" in start) cmd_exam_start "${3:?exam}";; check) cmd_exam_check "${3:?exam}";; reset) cmd_exam_reset "${3:?exam}";; *) sed -n '2,16p' "$0";; esac;;
+  exam) case "${2:-}" in start) cmd_exam_start "${3:?exam}";; check) cmd_exam_check "${3:?exam}";; reset) cmd_exam_reset "${3:?exam}";; *) sed -n '2,20p' "$0";; esac;;
+  issue) case "${2:-}" in
+      list) cmd_issue_list;;
+      take) cmd_issue_take "${3:?이슈 번호 (예: q issue take 1)}" "${4:-}";;
+      *) sed -n '2,24p' "$0";; esac;;
   cluster) case "${2:-}" in up) bash "$ROOT/common/setup/create-cluster.sh";; down) bash "$ROOT/common/setup/destroy-cluster.sh";; *) echo "q cluster up|down";; esac;;
-  ""|help|-h|--help) sed -n '2,16p' "$0"; echo; cmd_list;;
-  *) sed -n '2,16p' "$0";;
+  ""|help|-h|--help) sed -n '2,20p' "$0"; echo; cmd_list;;
+  *) sed -n '2,20p' "$0";;
 esac

@@ -1,112 +1,69 @@
-# '새 문제 제안' 이슈 → 문제 폴더 생성 → PR. 이슈를 수정하면 같은 PR 이 갱신된다.
-name: New Question (issue → PR)
+# '새 문제 제안' 이슈 → 폼 검증만 수행하고 결과를 코멘트한다.
+# 실제 폴더 생성·브랜치·PR 은 메인테이너가 로컬에서 `q issue take <이슈번호>` 로 만든다.
+# (조직 정책상 Actions 에 PR 생성 권한이 없어도 동작하게 하기 위한 구조)
+name: Validate New Question
 on:
   issues:
     types: [opened, edited, reopened]
 permissions:
-  contents: write
-  pull-requests: write
   issues: write
+concurrency:
+  group: validate-question-${{ github.event.issue.number }}
+  cancel-in-progress: true
 jobs:
-  generate:
+  validate:
     if: contains(github.event.issue.labels.*.name, 'new-question')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-          token: ${{ secrets.QUESTION_BOT_TOKEN || github.token }}
 
-      - name: Generate question folder
+      - name: Validate issue form
         id: gen
         run: |
           set +e
-          out=$(python3 scripts/issue-to-question.py "$GITHUB_EVENT_PATH" 2>/tmp/err); rc=$?
+          out=$(python3 scripts/issue-to-question.py "$GITHUB_EVENT_PATH" --dry-run 2>/tmp/err); rc=$?
           set -e
           if [ "$rc" -ne 0 ]; then
             echo "ok=false" >> "$GITHUB_OUTPUT"
-            { echo "errors<<EOF"; cat /tmp/err; echo "EOF"; } >> "$GITHUB_OUTPUT"
+            { echo "errors<<XEOFX"; cat /tmp/err; echo "XEOFX"; } >> "$GITHUB_OUTPUT"
             exit 0
           fi
           echo "ok=true" >> "$GITHUB_OUTPUT"
           echo "$out" >> "$GITHUB_OUTPUT"
 
-      - name: Report validation errors
-        if: steps.gen.outputs.ok == 'false'
+      - name: Comment result
         uses: actions/github-script@v7
         env:
+          OK: ${{ steps.gen.outputs.ok }}
           ERRORS: ${{ steps.gen.outputs.errors }}
-        with:
-          script: |
-            const body = `### ❌ 폼 검증 실패\n\n${process.env.ERRORS}\n\n이슈 본문을 **수정(Edit)** 하면 자동으로 다시 시도한다.`;
-            await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
-            await github.rest.issues.addLabels({ ...context.repo, issue_number: context.issue.number, labels: ['invalid'] });
-
-      - name: Lint + regenerate README
-        if: steps.gen.outputs.ok == 'true'
-        run: |
-          bash scripts/lint-questions.sh
-          REPO="${{ github.repository }}" bash scripts/gen-readme.sh
-
-      - name: Create / update PR
-        if: steps.gen.outputs.ok == 'true'
-        id: pr
-        continue-on-error: true
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.QUESTION_BOT_TOKEN || github.token }}
-          branch: question/issue-${{ github.event.issue.number }}
-          delete-branch: true
-          commit-message: "feat: 새 문제 ${{ steps.gen.outputs.id }} ${{ steps.gen.outputs.title }} (#${{ github.event.issue.number }})"
-          title: "feat: 새 문제 ${{ steps.gen.outputs.id }} — ${{ steps.gen.outputs.title }}"
-          labels: new-question
-          body: |
-            이슈 #${{ github.event.issue.number }} 의 폼으로 생성된 문제.
-
-            - 폴더: `${{ steps.gen.outputs.dir }}`
-            - 제안자: @${{ github.event.issue.user.login }}
-
-            **메인테이너**: 내용 확인 후 이슈에 `approved` 라벨을 달면 자동 머지된다. 수정이 필요하면 이슈 본문을 고치도록 코멘트하거나 이 브랜치에 직접 커밋한다.
-
-            Closes #${{ github.event.issue.number }}
-
-      - name: Comment PR link on issue
-        if: steps.gen.outputs.ok == 'true' && steps.pr.outcome == 'success'
-        uses: actions/github-script@v7
-        env:
-          PR_URL: ${{ steps.pr.outputs.pull-request-url }}
           QID: ${{ steps.gen.outputs.id }}
           QDIR: ${{ steps.gen.outputs.dir }}
+          QCERT: ${{ steps.gen.outputs.cert }}
         with:
           script: |
-            const { PR_URL, QID, QDIR } = process.env;
-            const body = `### ✅ 문제 ${QID} 생성됨\n\nPR: ${PR_URL}\n폴더: \`${QDIR}\`\n\n메인테이너가 이 이슈에 \`approved\` 라벨을 달면 자동 머지된다. 내용을 바꾸려면 이슈 본문을 수정하면 PR 이 갱신된다.`;
-            await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
-            try { await github.rest.issues.removeLabel({ ...context.repo, issue_number: context.issue.number, name: 'invalid' }); } catch (e) {}
-
-      # PR 자동 생성이 막힌 경우(조직/저장소의 'Allow GitHub Actions to create and approve pull requests' 미설정)
-      # 브랜치는 이미 올라가 있으므로 수동으로 PR 을 열 수 있는 링크를 남긴다.
-      - name: Fallback comment when PR creation is blocked
-        if: steps.gen.outputs.ok == 'true' && steps.pr.outcome == 'failure'
-        uses: actions/github-script@v7
-        env:
-          QID: ${{ steps.gen.outputs.id }}
-          QDIR: ${{ steps.gen.outputs.dir }}
-          BRANCH: question/issue-${{ github.event.issue.number }}
-        with:
-          script: |
-            const { QID, QDIR, BRANCH } = process.env;
-            const base = context.payload.repository.default_branch;
-            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${base}...${BRANCH}?expand=1`;
-            const body = [
-              `### ⚠️ 문제 ${QID} 생성됨 (PR 자동 생성은 실패)`,
-              ``,
-              `브랜치 \`${BRANCH}\` 에 \`${QDIR}\` 가 커밋되었다. PR 만 만들지 못했다.`,
-              ``,
-              `**PR 열기**: ${url}`,
-              ``,
-              `**원인**: Actions 에 PR 생성 권한이 없다. 조직 Settings → Actions → General → Workflow permissions 와`,
-              `저장소의 같은 설정에서 *Allow GitHub Actions to create and approve pull requests* 를 켠 뒤,`,
-              `이 이슈 본문을 아무거나 수정하면 자동으로 다시 시도한다.`,
-            ].join("\n");
-            await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            const { OK, ERRORS, QID, QDIR, QCERT } = process.env;
+            const n = context.issue.number;
+            const add = (labels) => github.rest.issues.addLabels({ ...context.repo, issue_number: n, labels });
+            const drop = async (name) => { try { await github.rest.issues.removeLabel({ ...context.repo, issue_number: n, name }); } catch (e) {} };
+            let body;
+            if (OK === 'true') {
+              body = [
+                `### ✅ 폼 검증 통과`,
+                ``,
+                `머지되면 \`${QDIR}\` 로 추가된다 (번호 **${QID}**, 자격증 \`${QCERT}\`). 번호는 머지 시점에 다시 계산된다.`,
+                ``,
+                `**메인테이너**: 로컬에서 아래를 실행하면 브랜치·커밋·PR 이 만들어진다.`,
+                ``,
+                '```bash',
+                `q issue take ${n}`,
+                '```',
+                ``,
+                `내용을 고치려면 이슈 본문을 수정하면 된다. 저장할 때마다 다시 검증한다.`,
+              ].join('\n');
+              await drop('invalid');
+              if (QCERT) { try { await add([QCERT]); } catch (e) {} }
+            } else {
+              body = `### ❌ 폼 검증 실패\n\n${ERRORS}\n\n이슈 본문을 **수정(Edit)** 하면 자동으로 다시 검증한다.`;
+              await add(['invalid']);
+            }
+            await github.rest.issues.createComment({ ...context.repo, issue_number: n, body });

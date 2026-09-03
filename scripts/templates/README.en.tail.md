@@ -61,7 +61,7 @@ The free plan gives 120 core-hours per month, which is 30 hours on the 4-core ma
 
 ## Contributing
 
-Solutions go in Issues. New questions go through the **Add a Question** form (a bot opens the PR, a maintainer merges it with the `approved` label) or a direct PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Solutions go in Issues. New questions go through the **Add a Question** form or a direct PR. See [CONTRIBUTING.md](CONTRIBUTING.md) for the contract and the maintainer workflow.
 
 ## License
 
