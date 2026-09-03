@@ -108,3 +108,17 @@ questions:
 ## 노트
 
 `<cert>/notes/` 도메인당 1파일. 시험에 나오는 것만. 명령·YAML 은 복붙 가능한 형태로.
+
+## 메인테이너: 저장소 설정
+
+이슈 폼 → 봇 PR 자동화가 동작하려면 아래가 켜져 있어야 한다.
+
+| 위치 | 설정 |
+|---|---|
+| 조직 Settings → Actions → General | Workflow permissions: **Read and write**, **Allow GitHub Actions to create and approve pull requests** 체크 |
+| 저장소 Settings → Actions → General | 위와 동일 (조직 설정이 저장소를 덮어쓰므로 조직부터) |
+| 저장소 Settings → General → Pull Requests | **Allow squash merging** 체크 (`approved` 라벨 머지가 squash 를 쓴다) |
+
+조직 정책상 Actions 의 PR 생성을 열 수 없다면, `QUESTION_BOT_TOKEN` 시크릿에 fine-grained PAT(이 저장소 대상, Contents·Pull requests·Issues write)을 넣으면 우회된다. 워크플로우가 이 시크릿을 우선 사용한다.
+
+PR 생성이 막히면 봇이 이슈에 브랜치 비교 링크를 남기므로 수동으로 PR 을 열어도 된다. 그 PR 도 `approved` 라벨 머지 대상이다.

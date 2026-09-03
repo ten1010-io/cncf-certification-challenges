@@ -51,6 +51,7 @@ jobs:
       - name: Create / update PR
         if: steps.gen.outputs.ok == 'true'
         id: pr
+        continue-on-error: true
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.QUESTION_BOT_TOKEN || github.token }}
@@ -70,7 +71,7 @@ jobs:
             Closes #${{ github.event.issue.number }}
 
       - name: Comment PR link on issue
-        if: steps.gen.outputs.ok == 'true'
+        if: steps.gen.outputs.ok == 'true' && steps.pr.outcome == 'success'
         uses: actions/github-script@v7
         env:
           PR_URL: ${{ steps.pr.outputs.pull-request-url }}
@@ -82,3 +83,30 @@ jobs:
             const body = `### ✅ 문제 ${QID} 생성됨\n\nPR: ${PR_URL}\n폴더: \`${QDIR}\`\n\n메인테이너가 이 이슈에 \`approved\` 라벨을 달면 자동 머지된다. 내용을 바꾸려면 이슈 본문을 수정하면 PR 이 갱신된다.`;
             await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
             try { await github.rest.issues.removeLabel({ ...context.repo, issue_number: context.issue.number, name: 'invalid' }); } catch (e) {}
+
+      # PR 자동 생성이 막힌 경우(조직/저장소의 'Allow GitHub Actions to create and approve pull requests' 미설정)
+      # 브랜치는 이미 올라가 있으므로 수동으로 PR 을 열 수 있는 링크를 남긴다.
+      - name: Fallback comment when PR creation is blocked
+        if: steps.gen.outputs.ok == 'true' && steps.pr.outcome == 'failure'
+        uses: actions/github-script@v7
+        env:
+          QID: ${{ steps.gen.outputs.id }}
+          QDIR: ${{ steps.gen.outputs.dir }}
+          BRANCH: question/issue-${{ github.event.issue.number }}
+        with:
+          script: |
+            const { QID, QDIR, BRANCH } = process.env;
+            const base = context.payload.repository.default_branch;
+            const url = `https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${base}...${BRANCH}?expand=1`;
+            const body = [
+              `### ⚠️ 문제 ${QID} 생성됨 (PR 자동 생성은 실패)`,
+              ``,
+              `브랜치 \`${BRANCH}\` 에 \`${QDIR}\` 가 커밋되었다. PR 만 만들지 못했다.`,
+              ``,
+              `**PR 열기**: ${url}`,
+              ``,
+              `**원인**: Actions 에 PR 생성 권한이 없다. 조직 Settings → Actions → General → Workflow permissions 와`,
+              `저장소의 같은 설정에서 *Allow GitHub Actions to create and approve pull requests* 를 켠 뒤,`,
+              `이 이슈 본문을 아무거나 수정하면 자동으로 다시 시도한다.`,
+            ].join("\n");
+            await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
